@@ -1,0 +1,61 @@
+<html>
+<head>
+<title>
+
+</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="5eTools.js"></script>
+<script>
+var players = ['Piper','Alexaris','Nugar','Gage','Revyn','Rolan','Nevarylith','Sybil'];
+var inits = [];
+//Write 0 for all players initial init
+for (var p in players) {
+	inits[p] = 0;
+}
+
+//Get all divs as variables for later use
+
+
+function removePlayer(name) {
+  remove(name+"line")
+  var index = players.indexOf(name);
+  if (index !== -1) players.splice(index, 1);
+}
+
+function addMonster() {
+  name = document.getElementById('newMonster').value;
+  var i = 0;
+  for (var monster in monsters)  {
+	if (monsters[monster].name==name) {
+		i = monster;
+	}
+  }
+  players.push(name);
+  writeInitList();
+  var monsterInit = calcInit(i);
+  document.getElementById(name+'init').value = monsterInit;
+  document.getElementById("newMonster").focus();
+  document.getElementById("newMonster").addEventListener("keyup",function(event){if (event.keyCode===13) {addMonster()}});
+}
+
+function writeInitList() {
+var initTracker = document.getElementById('initTracker');
+initTracker.innerHTML = "";
+var i=1;
+for (var p in players) {
+	var name = players[p];
+	var init = inits[p];	
+	initTracker.innerHTML+="<div id='"+name+"line'><a href='#'><img src='red-x-hi.png' width='15' height='15' onclick=removePlayer('"+name+"')></a>"+name+"  "+"<input id='"+name+"init' size='4' value='"+init+"' tabindex="+i+"></div>";
+	i++;
+}
+ initTracker.innerHTML+="<input id='newMonster'>";
+  document.getElementById("newMonster").addEventListener("keyup",function(event){if (event.keyCode===13) {addMonster()}});
+  initTracker.innerHTML+="<a href=#><img src='green-plus-sign-hi.png' width='15' height='15' onclick='addMonster()'></a>";
+}
+</script>
+</head>
+
+<body onload="writeInitList()">
+<div id='initTracker'></div>
+</body>
+</html>

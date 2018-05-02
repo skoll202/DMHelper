@@ -1,0 +1,159 @@
+<!--
+Player names
+Player Init rolls
+Monster names
+Monster init rolls
+monster HP
+monster attacks
+monster stat modifiers
+monster ac
+monster languages
+monster XP
+Monster abilities
+Monster actions
+monster senses
+monster resistance and immunities
+Monster Notes for DM
+Monster Speed
+-->
+<html>
+<head>
+<title>
+DM Helper
+</title>
+<link rel="stylesheet" type="text/css" href="styles.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+document.addEventListener("keyup", function (evt) {updateOrder();},false);
+var players = ['Piper','Alexaris','Nugar','Gage','Revyn','Rolan','Nevarylith','Sybil'];
+var sortedPlayers = [];
+var currentPlayer = 0;
+var inits = []
+var monsters = [];
+$.getJSON('monsters.json',function(data){console.log(data[2]);monsters =data;});
+function removePlayer(name) {
+  //alert(name);
+  remove(name+"line")
+  var index = players.indexOf(name);
+  if (index !== -1) players.splice(index, 1);
+}
+function remove(id) {
+    var elem = document.getElementById(id);
+    return elem.parentNode.removeChild(elem);
+}
+function calcHP(id) {
+	var hpArray = monsters[id].hit_dice.split('d');
+	var hp = 0;
+	for (i=0;i<hpArray[0];i++) {
+		hp+=Math.floor(Math.random() * hpArray[1])+1;
+		console.log(hp);
+	}
+	return hp;
+}
+function calcInit(id) {
+	var dex = monsters[id].dexterity;
+	return Math.floor(Math.random() * 20)+1+calcModifier(dex);
+}
+function calcModifier(stat) {
+	var mod = [-5,-5,-4,-4,-3,-3,-2,-2,-1,-1,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10];
+	return mod[stat];
+}
+function updateOrder() {
+  var sortedList = document.getElementById("sortedList");
+  sortedList.innerHTML="";
+  sortedPlayers = [];
+  var i = 50;
+  while (i>-5) {
+    for (var p in players) {
+      var name = players[p];
+      var init = document.getElementById(name+"init").value;
+      if(init==i) {
+        sortedList.innerHTML+="<div id='"+name+"sorted'>"+name+"</div>";
+        sortedPlayers.push(name);
+      }
+    }
+    i--;
+  }
+
+  document.getElementById(sortedPlayers[currentPlayer]+'sorted').classList.add("currentPlayer");
+}
+function addMonster() {
+  name = document.getElementById('newMonster').value;
+  var i = 0;
+  for (var monster in monsters)  {
+	console.log(monster);
+	if (monsters[monster].name==name) {
+		i = monster;
+	}
+  }
+  players.push(name);
+  writeList();
+  var monsterInit = calcInit(i);
+  document.getElementById(name+'init').value = monsterInit;
+  document.getElementById("newMonster").focus();
+  document.getElementById("newMonster").addEventListener("keyup",function(event){if (event.keyCode===13) {addMonster()}});
+}
+function nextPlayer() {
+  currentPlayer++;
+  if(currentPlayer>=sortedPlayers.length){
+    currentPlayer=0;
+  }
+  updateOrder();
+}
+function writeList() {
+  var list = document.getElementById('playerList');
+  for (var player in players) {
+    var name = players[player];
+    try{
+      inits[player] = document.getElementById(name+'init').value;
+    }
+    catch(err) {
+      inits[player] = 0;
+    }
+  }
+  list.innerHTML=''
+  i=1;
+  for (var player in players) {
+    var name = players[player];
+    var init = inits[player];
+    list.innerHTML+="<div id='"+name+"line'><a href='#'><img src='red-x-hi.png' width='15' height='15' onclick=removePlayer('"+name+"')></a>"+name+"  "+"<input id='"+name+"init' size='4' value='"+init+"' tabindex="+i+"></div>";
+    var inputbox = document.getElementById(name+'init');
+    i++;
+  }
+  list.innerHTML+="<input id='newMonster'>";
+  document.getElementById("newMonster").addEventListener("keyup",function(event){if (event.keyCode===13) {addMonster()}});
+  list.innerHTML+="<a href=#><img src='green-plus-sign-hi.png' width='15' height='15' onclick='addMonster()'></a>";
+}
+</script>
+</head>
+<body>
+  <div class="title">Encounter Tracker</div>
+  <div class="list" id="playerList">
+    <script>
+    i=1;
+    var list = document.getElementById('playerList');
+    for (var player in players) {
+      var name = players[player];
+      var init = inits[player];
+      list.innerHTML+="<div id='"+name+"line'><a href='#'><img src='red-x-hi.png' width='15' height='15' onclick=removePlayer('"+name+"')></a>"+name+"  "+"<input id='"+name+"init' size='4' value='0' tabindex="+i+"></div>";
+      var inputbox = document.getElementById(name+'init');
+      i++;
+    }
+    </script>
+    <input id='newMonster'>
+    <script>
+    document.getElementById("newMonster").addEventListener("keyup",function(event){if (event.keyCode===13) {addMonster()}});
+    </script>
+    <a href=#><img src="green-plus-sign-hi.png" width='15' height='15' onclick='addMonster()'></a>
+  </div>
+  <br>
+  <div id="sortedList">
+
+  </div>
+  <br>
+  <div>
+<a href=# onclick="nextPlayer()">Next</a>
+</div>
+
+</body>
+</html>
